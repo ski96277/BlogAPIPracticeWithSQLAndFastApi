@@ -34,3 +34,10 @@ def create_blog(blog_req: CreateBlogSchemas, db: Session = Depends(get_db)):
 def get_all_blogs(db: Session = Depends(get_db)):
     blogs = db.query(blog_model.BlogModel).all()
     return blogs
+
+
+# Get a single blog from the databse
+@app.get("/blog/{id}")
+def get_blog_by_id(id, db: Session = Depends(get_db)):
+    blog = db.query(blog_model.BlogModel).filter(blog_model.BlogModel.id == id).first()
+    return blog
