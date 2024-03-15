@@ -19,6 +19,7 @@ def get_db():
         db.close()
 
 
+# Post a blog to datanase
 @app.post('/create-blog')
 def create_blog(blog_req: CreateBlogSchemas, db: Session = Depends(get_db)):
     new_blog = blog_model.BlogModel(title=blog_req.title, body=blog_req.body)
@@ -26,3 +27,10 @@ def create_blog(blog_req: CreateBlogSchemas, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_blog)
     return new_blog
+
+
+# Get all blogs
+@app.get('/blogs')
+def get_all_blogs(db: Session = Depends(get_db)):
+    blogs = db.query(blog_model.BlogModel).all()
+    return blogs
