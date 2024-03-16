@@ -62,19 +62,15 @@ def delete_a_blog(blog_id, response: Response, db: Session = Depends(get_db)):
     else:
         return {'response': f"Deleted the blog id {blog_id}"}
 
-#
-# @app.delete("/example/return/url/{blog_id}",status_code=status.HTTP_204_NO_CONTENT)
-# def simple_return(blog_id,db: Session = Depends(get_db)):
-#     is_deleted_blog = db.query(blog_model.BlogModel).filter(blog_model.BlogModel.id == blog_id).delete(
-#         synchronize_session=False)
-#     db.commit()
-#
-#     # id deleted blog 1 mean delete the blog 0 mean is not delete blog
-#     if is_deleted_blog != 1:
-#
-#         print("blog is not found ")
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-#                             detail=f"Blog is not deleted due to the blog {blog_id} not found or others issues")
-#
-#     else:
-#         return {'body': f"simple return {blog_id}"}
+
+@app.put('/blog/update/{blog_id}', status_code=status.HTTP_202_ACCEPTED)
+def update_blog(blog_id, response: Response, request: CreateBlogSchemas, db: Session = Depends(get_db)):
+    blog_update = db.query(blog_model.BlogModel).filter(blog_model.BlogModel.id == blog_id).update(
+        {"title": request.title, "body": request.body})
+    db.commit()
+    print(f"Blog updates {blog_update}")
+    if blog_update != 1:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog is not updated {blog_id}")
+    else:
+        return {"response": f"Updated blog {blog_id}", 'status_code': status.HTTP_202_ACCEPTED}
