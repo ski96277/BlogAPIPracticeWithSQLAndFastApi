@@ -85,3 +85,11 @@ def create_user(request: schemas.User, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+
+@app.get('/user/{user_id}', response_model=schemas.ShowUser, tags=['users'])
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(blog_model.User).filter(blog_model.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} is not available")
+    return user
