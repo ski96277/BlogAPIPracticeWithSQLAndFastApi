@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Depends, status, Response, HTTPException
 from sqlalchemy.orm import Session
 
-from schemas import Blog, ShowBlog
+import schemas
 from database import engine, SessionLocal
+from hashing import Hash
 from models import blog_model
 
 app = FastAPI()
@@ -21,7 +22,7 @@ def get_db():
 
 # Post a blog to datanase
 @app.post('/blogs/create-blog', status_code=status.HTTP_201_CREATED)
-def create_blog(blog_req: Blog, db: Session = Depends(get_db)):
+def create_blog(blog_req: schemas.Blog, db: Session = Depends(get_db)):
     new_blog = blog_model.BlogModel(title=blog_req.title, body=blog_req.body)
     db.add(new_blog)
     db.commit()
@@ -37,7 +38,7 @@ def get_all_blogs(db: Session = Depends(get_db)):
 
 
 # Get a single blog from the database
-@app.get('/blog/{blog_id}', status_code=status.HTTP_200_OK, response_model=ShowBlog)
+@app.get('/blog/{blog_id}', status_code=status.HTTP_200_OK, response_model=schemas.ShowBlog)
 def get_blog_by_id(blog_id, response: Response, db: Session = Depends(get_db)):
     blog = db.query(blog_model.BlogModel).filter(blog_model.BlogModel.id == blog_id).first()
     if not blog:
@@ -64,7 +65,7 @@ def delete_a_blog(blog_id, response: Response, db: Session = Depends(get_db)):
 
 
 @app.put('/blog/update/{blog_id}', status_code=status.HTTP_202_ACCEPTED)
-def update_blog(blog_id, response: Response, request: Blog, db: Session = Depends(get_db)):
+def update_blog(blog_id, response: Response, request: schemas.Blog, db: Session = Depends(get_db)):
     blog_update = db.query(blog_model.BlogModel).filter(blog_model.BlogModel.id == blog_id).update(
         {"title": request.title, "body": request.body})
     db.commit()
@@ -74,3 +75,13 @@ def update_blog(blog_id, response: Response, request: Blog, db: Session = Depend
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog is not updated {blog_id}")
     else:
         return {"response": f"Updated blog {blog_id}", 'status_code': status.HTTP_202_ACCEPTED}
+
+
+@app.post('/user',response_model=schemas.ShowUser)
+def create_user(request: schemas.User, db: Session = Depends(get_db)):
+    new_user = blog_model.User(name=request.name, email=request.email,
+                               password=Hash.get_password_hash(password=request.password))
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
