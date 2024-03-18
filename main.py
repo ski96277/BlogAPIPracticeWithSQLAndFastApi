@@ -21,7 +21,7 @@ def get_db():
 
 
 # Post a blog to datanase
-@app.post('/blogs/create-blog', status_code=status.HTTP_201_CREATED)
+@app.post('/blogs/create-blog', status_code=status.HTTP_201_CREATED, tags=['blogs'])
 def create_blog(blog_req: schemas.Blog, db: Session = Depends(get_db)):
     new_blog = blog_model.BlogModel(title=blog_req.title, body=blog_req.body)
     db.add(new_blog)
@@ -31,14 +31,14 @@ def create_blog(blog_req: schemas.Blog, db: Session = Depends(get_db)):
 
 
 # Get all blogs
-@app.get('/blogs/all', status_code=status.HTTP_200_OK)
+@app.get('/blogs/all', status_code=status.HTTP_200_OK, tags=['blogs'])
 def get_all_blogs(db: Session = Depends(get_db)):
     blogs = db.query(blog_model.BlogModel).all()
     return blogs
 
 
 # Get a single blog from the database
-@app.get('/blog/{blog_id}', status_code=status.HTTP_200_OK, response_model=schemas.ShowBlog)
+@app.get('/blog/{blog_id}', status_code=status.HTTP_200_OK, response_model=schemas.ShowBlog, tags=['blogs'])
 def get_blog_by_id(blog_id, response: Response, db: Session = Depends(get_db)):
     blog = db.query(blog_model.BlogModel).filter(blog_model.BlogModel.id == blog_id).first()
     if not blog:
@@ -48,7 +48,7 @@ def get_blog_by_id(blog_id, response: Response, db: Session = Depends(get_db)):
 
 
 # Delete a blog by id
-@app.delete('/blog/delete/{blog_id}')
+@app.delete('/blog/delete/{blog_id}', tags=['blogs'])
 def delete_a_blog(blog_id, response: Response, db: Session = Depends(get_db)):
     is_deleted_blog = db.query(blog_model.BlogModel).filter(blog_model.BlogModel.id == blog_id).delete(
         synchronize_session=False)
@@ -64,7 +64,7 @@ def delete_a_blog(blog_id, response: Response, db: Session = Depends(get_db)):
         return {'response': f"Deleted the blog id {blog_id}"}
 
 
-@app.put('/blog/update/{blog_id}', status_code=status.HTTP_202_ACCEPTED)
+@app.put('/blog/update/{blog_id}', status_code=status.HTTP_202_ACCEPTED, tags=['blogs'])
 def update_blog(blog_id, response: Response, request: schemas.Blog, db: Session = Depends(get_db)):
     blog_update = db.query(blog_model.BlogModel).filter(blog_model.BlogModel.id == blog_id).update(
         {"title": request.title, "body": request.body})
@@ -77,7 +77,7 @@ def update_blog(blog_id, response: Response, request: schemas.Blog, db: Session 
         return {"response": f"Updated blog {blog_id}", 'status_code': status.HTTP_202_ACCEPTED}
 
 
-@app.post('/user',response_model=schemas.ShowUser)
+@app.post('/user', response_model=schemas.ShowUser, tags=['users'])
 def create_user(request: schemas.User, db: Session = Depends(get_db)):
     new_user = blog_model.User(name=request.name, email=request.email,
                                password=Hash.get_password_hash(password=request.password))
