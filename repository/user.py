@@ -16,7 +16,7 @@ def create(db: Session, request: schemas.User):
     return new_user
 
 
-def get(db: Session, user_id: int):
+def show(db: Session, user_id: int):
     user = db.query(blog_model.User).filter(blog_model.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} is not available")
