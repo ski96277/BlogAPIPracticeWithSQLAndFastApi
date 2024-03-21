@@ -23,7 +23,7 @@ def get_db():
 # Post a blog to datanase
 @app.post('/blogs/create-blog', status_code=status.HTTP_201_CREATED, tags=['blogs'])
 def create_blog(blog_req: schemas.Blog, db: Session = Depends(get_db)):
-    new_blog = blog_model.BlogModel(title=blog_req.title, body=blog_req.body)
+    new_blog = blog_model.BlogModel(title=blog_req.title, body=blog_req.body, user_id=blog_req.user_id)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
