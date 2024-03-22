@@ -37,3 +37,8 @@ class ShowBlog(BaseModel):
     title: str
     body: str
     creator: ShowUser
+
+
+class Login(BaseModel):
+    username: str
+    password: str
